@@ -38,10 +38,7 @@ func init() {
 }
 
 func newProvider(cred *dns.Credential) (dns.Provider, error) {
-	apiUser := firstNonEmpty(
-		cred.Values["NAMECHEAP_API_USER"],
-		cred.Values["NAMECHEAP_USERNAME"],
-	)
+	apiUser := strings.TrimSpace(cred.Values["NAMECHEAP_API_USER"])
 	apiKey := strings.TrimSpace(cred.Values["NAMECHEAP_API_KEY"])
 	clientIP := firstNonEmpty(
 		cred.Values["NAMECHEAP_CLIENT_IP"],
@@ -405,8 +402,7 @@ func (h hostRecord) toRecord() dns.Record {
 	if h.MXPref > 0 {
 		value := h.MXPref
 		record.Priority = &value
-	}
-	if h.Priority > 0 {
+	} else if h.Priority > 0 {
 		value := h.Priority
 		record.Priority = &value
 	}
@@ -477,7 +473,7 @@ func splitDomain(domain string) (string, string, error) {
 		return "", "", fmt.Errorf("namecheap: parse domain %s: %w", normalized, err)
 	}
 	if !strings.EqualFold(etld1, normalized) {
-		return "", "", fmt.Errorf("namecheap: domain must be apex, got %s", domain)
+		return "", "", fmt.Errorf("namecheap: only root domains like example.com are supported (got %s)", domain)
 	}
 
 	suffix, _ := publicsuffix.PublicSuffix(normalized)
@@ -507,18 +503,13 @@ func parseTimeout(value string) time.Duration {
 	return time.Duration(seconds) * time.Second
 }
 
+// normalizeTTL ensures Namecheap receives a TTL value; the API requires a positive
+// TTL and accepts 60 seconds as the minimum.
 func normalizeTTL(ttl int) int {
 	if ttl <= 0 {
 		return 60
 	}
 	return ttl
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }
 
 func firstNonEmpty(values ...string) string {
