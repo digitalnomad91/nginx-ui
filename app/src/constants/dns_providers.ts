@@ -1,6 +1,6 @@
 import type { DNSProvider } from '@/api/auto_cert'
 
-export const ALLOWED_DNS_PROVIDER_CODES = ['alidns', 'tencentcloud', 'cloudflare'] as const
+export const ALLOWED_DNS_PROVIDER_CODES = ['alidns', 'tencentcloud', 'cloudflare', 'namecheap'] as const
 
 type DNSProviderIdentifier = Pick<DNSProvider, 'code' | 'provider' | 'name'> | null
 

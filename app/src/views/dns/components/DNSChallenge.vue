@@ -39,6 +39,11 @@ watch(current, () => {
 
     auto_cert.get_dns_provider(data.value.code).then(r => {
       Object.assign(current.value!, r)
+      if (current.value?.code === 'namecheap' && current.value.configuration) {
+        current.value.configuration.additional ??= {}
+        current.value.configuration.additional.NAMECHEAP_CLIENT_IP ??= 'Client IP authorized in Namecheap API whitelist'
+        current.value.configuration.additional.NAMECHEAP_USERNAME ??= 'Account username (defaults to API user)'
+      }
     })
   }
 }, { immediate: true })
